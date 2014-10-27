@@ -1,5 +1,10 @@
 hosted_init()
-gl.setup(1024, 768)
+
+if sys.version and sys.version > "0.8.0" then
+    gl.setup(NATIVE_WIDTH, NATIVE_HEIGHT)
+else
+    gl.setup(1024, 768)
+end
 
 local iblib = require "iblib"
 
