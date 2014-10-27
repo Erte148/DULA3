@@ -111,7 +111,7 @@ local faders = {
 
 local title_start = 99999999
 
-local idx = 1
+local idx = 0 -- offset before first item. will be incremented during first get_next_item
 local playlist_source = function()
     return CONFIG.playlist
 end;
