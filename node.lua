@@ -170,7 +170,7 @@ function node.render()
             elseif in_title > CONFIG.title_duration - 0.5 then
                 alpha = 1.0 - (in_title - CONFIG.title_duration + 0.5) * 2
             end
-            overlay:draw(0, HEIGHT - CONFIG.title_size - 10, WIDTH, HEIGHT, 0.7)
+            overlay:draw(0, HEIGHT - CONFIG.title_size - 10, WIDTH, HEIGHT, 0.7 * alpha)
             CONFIG.title_font:write(
                 10, HEIGHT - CONFIG.title_size - 5, 
                 player.get_current_item().title,
