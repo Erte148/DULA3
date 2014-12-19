@@ -111,6 +111,8 @@ local playlist_source = function()
     return CONFIG.playlist
 end;
 
+local overlay = resource.create_colored_texture(0, 0, 0, 1)
+
 local player = iblib.playlist{
     get_next_item = function()
         local playlist = playlist_source()
@@ -163,6 +165,7 @@ function node.render()
             elseif in_title > CONFIG.title_duration - 0.5 then
                 alpha = 1.0 - (in_title - CONFIG.title_duration + 0.5) * 2
             end
+            overlay:draw(0, HEIGHT - CONFIG.title_size - 10, WIDTH, HEIGHT, 0.7)
             CONFIG.title_font:write(
                 10, HEIGHT - CONFIG.title_size - 5, 
                 player.get_current_item().title,
