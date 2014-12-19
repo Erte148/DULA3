@@ -37,7 +37,26 @@
         "type": "duration",
         "doc_link": true,
         "default": 1
-    }, 
+    }, {
+        "title": "Automatic resolution",
+        "ui_width": 4,
+        "name": "auto_resolution",
+        "type": "boolean",
+        "default": true
+    }, {
+        "title": "Manual width",
+        "ui_width": 4,
+        "name": "width",
+        "type": "integer",
+        "default": 1280
+    }, {
+        "title": "Manual height",
+        "ui_width": 4,
+        "name": "width",
+        "type": "integer",
+        "default": 1024
+    },
+   
         
     {
         "title": "Title options",
