@@ -52,7 +52,7 @@
     }, {
         "title": "Manual height",
         "ui_width": 4,
-        "name": "width",
+        "name": "height",
         "type": "integer",
         "default": 1024
     },
