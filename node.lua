@@ -6,6 +6,8 @@ else
     gl.setup(CONFIG.width, CONFIG.height)
 end
 
+node.set_flag("slow_gc", false)
+
 local iblib = require "iblib"
 
 setmetatable(_G, {
