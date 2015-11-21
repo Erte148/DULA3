@@ -8,6 +8,12 @@ end
 
 local iblib = require "iblib"
 
+setmetatable(_G, {
+    __newindex = function(t, k, v)
+        error("cannot assign " .. k)
+    end
+})
+
 local function make_blender(blend_src)
     local function create_shader(main_src)
         local src = [[
@@ -127,15 +133,20 @@ local player = iblib.playlist{
         end
 
         local item = playlist[idx]
-
         if not item then
-            return false, nil
+            return nil
+        else
+            return {
+                title = item.title;
+                duration = item.duration;
+                obj = item.file();
+            }
         end
-
-        return true, item
     end;
 
-    switch_time = CONFIG.switch_time,
+    get_switch_time = function()
+        return CONFIG.switch_time
+    end;
 
     fade = function(...)
         title_start = sys.now() + 1.0
@@ -143,15 +154,7 @@ local player = iblib.playlist{
     end;
 
     draw = util.draw_correct;
-
-    playback_started = function(current_item)
-        pp(current_item)
-    end
 }
-
-node.event("config_update", function()
-    player.set_switch_time(CONFIG.switch_time)
-end)
 
 function node.render()
     CONFIG.background_color.clear()

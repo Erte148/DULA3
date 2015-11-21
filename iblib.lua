@@ -1,129 +1,113 @@
 module("iblib", package.seeall)
 
 function playlist(opt)
-    local blank = resource.create_colored_texture(0, 0, 0, 0)
+    local get_next_item = opt.get_next_item
+    local get_switch_time = opt.get_switch_time
 
-    local current_item
+    local player_fade = opt.fade
+    local player_draw = opt.draw
+
+    local blank = resource.create_colored_texture(0, 0, 0, 0)
+    local dummy_item = {
+        obj = {
+            grab = function()
+                return true
+            end;
+            load = function()
+            end;
+            state = function()
+                return "ready"
+            end;
+            start = function()
+            end;
+            get_surface = function()
+                return blank, function() end
+            end;
+            unload = function()
+            end;
+        },
+        duration = 1,
+        title = "",
+    }
+
+    local current_item = dummy_item
     local next_item
 
-    local switch_time = opt.switch_time
 
     -- state vars
-    local fade_start
-    local preload_start
+    local fade_start = sys.now()
     local progress
 
-    local state = "initial"
-
-    local loader_opt = opt.loader_opt or {
-        loop = false,
-    }
+    local state = "preload_start"
 
     local function draw(...)
         local now = sys.now()
-        -- print("state -> ", state)
 
-        if state == "initial" then
-            has_next, next_item = opt.get_next_item()
-            if not has_next then
-                print("no initial item")
-                return
+        if state == "preload_start" then
+            next_item = get_next_item()
+            if not next_item then
+                print "no item. using dummy"
+                next_item = dummy_item
             end
-            state = "load_initial"
-            load_start = now
-        end
-        
-        if state == "load_initial" then
-            if next_item.file.load(loader_opt) then
-                next_item.load_time = now - load_start
-                fade_start = now
-                state = "wait_fade"
-            end
-        end
 
-        if state == "getnext" then
-            has_next, next_item = opt.get_next_item()
-            if not has_next then
-                print("no item")
-                return
+            if next_item.obj.grab() then
+                next_item.obj.load()
+                state = "preload_wait"
             else
-                state = "wait"
-                fade_start = now + current_item.duration - switch_time
-                preload_start = fade_start - (next_item.load_time or 0)
+                print "oops. cannot grab next item"
             end
         end
 
-        if state == "wait" then
-            if now > preload_start then
-                state = "preload"
+        if state == "preload_wait" then
+            local load_state = next_item.obj.state()
+            if load_state == "ready" then
+                state = "preload_idle"
+            elseif load_state == "error" then
+                -- try next item
+                state = "preload_start"
             end
         end
 
-        if state == "preload" then
-            state = "loading"
-            load_start = now
-        end
-        
-        if state == "loading" then
-            if next_item.file.load(loader_opt) then
-                next_item.load_time = now - load_start
-                state = "wait_fade"
-            end
-        end
-        
-        if state == "wait_fade" then
+        if state == "preload_idle" then
             if now > fade_start then
-                print("delta fade: ", now - fade_start)
-                -- re-adjust. now might have passed fade_start for various reasons:
-                -- unexpected loading times, inactive node, ...
                 fade_start = now 
+                next_item.obj.start()
                 state = "crossfade"
             end
         end
         
         if state == "crossfade" then
             local fade_time = now - fade_start
-            progress = fade_time / switch_time
+            progress = fade_time / get_switch_time()
             if progress > 1 then
                 progress = 1
-            end
-            if fade_time > switch_time then
-                state = "unload"
+                state = "switch"
             end
         end
 
-        if state == "unload" then
-            if current_item and current_item ~= next_item then
-                current_item.file.unload()
-            end
+        if state == "switch" then
+            current_item.obj.unload()
             current_item = next_item
-            opt.playback_started(current_item)
+            fade_start = sys.now() + current_item.duration
             next_item = nil
-            state = "getnext"
-        end
-
-        -- Drawing
-        local current_surface = blank
-        if current_item then
-            current_surface = current_item.file.get_surface()
+            state = "preload_start"
         end
 
         if state == "crossfade" then
-            local next_surface = blank
-            if next_item then
-                next_surface = next_item.file.get_surface()
-            end
-            opt.fade(current_surface, next_surface, progress, ...)
+            local n, n_dispose = next_item.obj.get_surface()
+            local c, c_dispose = current_item.obj.get_surface()
+            player_fade(c, n, progress, ...)
+            n_dispose()
+            c_dispose()
         else
-            opt.draw(current_surface, ...)
+            local c, c_dispose = current_item.obj.get_surface()
+            player_draw(c, ...)
+            c_dispose()
         end
     end
 
     return {
         draw = draw;
-        set_switch_time = function(time)
-            switch_time = time
-        end;
         get_current_item = function()
             return current_item
         end;

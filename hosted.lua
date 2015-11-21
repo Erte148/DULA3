@@ -29,101 +29,144 @@
 
 local resource_types = {
     ["image"] = function(value)
-        local surface
-        local image = {
-            asset_name = value.asset_name,
-            filename = value.filename,
-            type = value.type,
-        }
-
-        function image.ensure_loaded()
-            if not surface then
-                surface = resource.load_image(value.asset_name)
+        return function()
+            local surface
+            local file
+            local image = {
+                asset_name = value.asset_name,
+                filename = value.filename,
+                type = value.type,
+            }
+            function image.grab()
+                if file then
+                    return true
+                end
+                local ok, openfile = pcall(resource.open_file, value.asset_name)
+                if not ok then
+                    return false
+                else
+                    file = openfile
+                    return true
+                end
             end
-            return surface
-        end
-        function image.load()
-            if surface then
+            function image.load()
+                if not surface then
+                    surface = resource.load_image(file)
+                end
+            end
+            function image.state()
                 local state = surface:state()
-                return state ~= "loading"
-            else
-                surface = resource.load_image_async(value.asset_name)
-                return false
-                -- surface = resource.load_image(value.asset_name)
-                -- return true
+                if state == "loading" then
+                    return "loading"
+                elseif state == "loaded" then
+                    return "ready"
+                elseif state == "error" then
+                    return "error"
+                end
             end
-        end
-        function image.get_surface()
-            return image.ensure_loaded()
-        end
-        function image.draw(...)
-            image.ensure_loaded():draw(...)
-        end
-        function image.unload()
-            if surface then
-                surface:dispose()
-                surface = nil
+            function image.start()
             end
+            function image.get_surface()
+                return surface, function() end
+            end
+            function image.unload()
+                if file then
+                    file:dispose()
+                    file = nil
+                end
+                if surface then
+                    surface:dispose()
+                    surface = nil
+                end
+            end
+            return image
         end
-        return image
     end;
     ["video"] = function(value)
-        local surface
-        local video = {
-            asset_name = value.asset_name,
-            filename = value.filename,
-            type = value.type,
-        }
-        function video.ensure_loaded(opt)
-            if not surface then
-                surface = util.videoplayer(value.asset_name, opt)
+        return function()
+            local surface
+            local file
+            local video = {
+                asset_name = value.asset_name,
+                filename = value.filename,
+                type = value.type,
+            }
+            function video.grab()
+                if file then
+                    return true
+                end
+                local ok, openfile = pcall(resource.open_file, value.asset_name)
+                if not ok then
+                    return false
+                else
+                    file = openfile
+                    return true
+                end
             end
-            return surface
-        end
-        function video.load(opt)
-            if surface then
+            function video.load(opt)
+                if not surface then
+                    surface = resource.load_video{
+                        file = file,
+                        paused = true,
+                    }
+                end
+            end
+            function video.state()
                 local state = surface:state()
-                return state ~= "loading"
-            else
-                surface = util.videoplayer(value.asset_name, opt)
-                return false
+                if state == "loading" then
+                    return "loading"
+                elseif state == "paused" then
+                    return "ready"
+                elseif state == "error" then
+                    return "error"
+                end
             end
-        end
-        function video.get_surface()
-            return video.ensure_loaded()
-        end
-        function video.draw(...)
-            video.ensure_loaded():draw(...)
-        end
-        function video.unload()
-            if surface then
-                surface:dispose()
-                surface = nil
+            function video.start()
+                surface:start()
             end
+            function video.get_surface()
+                return surface, function() end
+            end
+            function video.unload()
+                if file then
+                    file:dispose()
+                    file = nil
+                end
+                if surface then
+                    surface:dispose()
+                    surface = nil
+                end
+            end
+            return video
         end
-        return video
     end;
     ["child"] = function(value)
-        local child = {
-            asset_name = value.asset_name,
-            filename = value.filename,
-            type = value.type,
-        }
-        function child.ensure_loaded()
-            return resource.render_child(value.asset_name)
+        return function()
+            local child = {
+                asset_name = value.asset_name,
+                filename = value.filename,
+                type = value.type,
+            }
+            function child.grab()
+                return true
+            end
+            function child.load()
+            end
+            function child.state()
+                return "ready"
+            end
+            function child.start()
+            end
+            function child.get_surface()
+                local surface = resource.render_child(value.asset_name)
+                return surface, function()
+                    surface:dispose()
+                end
+            end
+            function child.unload()
+            end
+            return child
         end
-        function child.load()
-            return true
-        end
-        function child.get_surface()
-            return resource.render_child(value.asset_name)
-        end
-        function child.draw(...)
-            resource.render_child(value.asset_name):draw(...)
-        end
-        function child.unload()
-        end
-        return child
     end;
 }
 
