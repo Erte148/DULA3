@@ -1,7 +1,3 @@
-= Simple Play list player
-
-{{screenshot.jpg|Screenshot}}
-
 == Description
 
 This is a small example of a simple play list player that supports any resource type. This includes images, videos and other
