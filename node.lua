@@ -1,6 +1,6 @@
 hosted_init()
 
-if sys.version and sys.version > "0.8.0" and CONFIG.auto_resolution then
+if CONFIG.auto_resolution then
     gl.setup(NATIVE_WIDTH, NATIVE_HEIGHT)
 else
     gl.setup(CONFIG.width, CONFIG.height)
