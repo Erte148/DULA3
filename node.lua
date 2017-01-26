@@ -1,5 +1,5 @@
 hosted_init()
-gl.setup(1024, 768)
+gl.setup(NATIVE_WIDTH, NATIVE_HEIGHT)
 
 local iblib = require "iblib"
 
@@ -149,8 +149,8 @@ node.event("config_update", function()
 end)
 
 function node.render()
+    player.prepare()
     CONFIG.background_color.clear()
-
     player.draw(0, 0, WIDTH, HEIGHT)
 
     if CONFIG.show_title then

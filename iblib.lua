@@ -19,6 +19,54 @@ function playlist(opt)
         loop = false,
     }
 
+    local blur = resource.create_shader[[
+        uniform sampler2D Texture;
+        varying vec2 TexCoord;
+        uniform vec4 Color;
+        uniform float level;
+
+        void main() {
+            gl_FragColor = texture2D(Texture, TexCoord, level) * Color;
+        }
+    ]]
+
+    local blur = resource.create_shader[[
+        uniform sampler2D Texture;
+        varying vec2 TexCoord;
+        uniform vec4 Color;
+        uniform float level;
+
+        void main() {
+            gl_FragColor = (texture2D(Texture, TexCoord, 4.5) + 
+                            texture2D(Texture, TexCoord, 5.5) + 
+                            texture2D(Texture, TexCoord, 6.5) + 
+                            texture2D(Texture, TexCoord, 7.5)) * 0.25;
+        }
+    ]]
+
+    local function prepare()
+        if state == "blur" then
+            local obj = next_item.file.get_surface()
+            state = "wait_fade"
+
+            local iw, ih = obj:size()
+            local i_aspect = iw/ih
+            local s_aspect = WIDTH/HEIGHT
+            local w, h = WIDTH, HEIGHT
+            if i_aspect < s_aspect then
+                h = h * (s_aspect / i_aspect)
+            else
+                w = w * (i_aspect / s_aspect)
+            end
+
+            blur:use()
+            obj:draw(WIDTH/2-w/2, HEIGHT/2-h/2, WIDTH/2+w/2, HEIGHT/2+h/2)
+            blur:deactivate()
+            util.draw_correct(obj, 0, 0, WIDTH, HEIGHT)
+            next_item.blurred = resource.create_snapshot()
+        end
+    end
+
     local function draw(...)
         local now = sys.now()
         -- print("state -> ", state)
@@ -37,7 +85,7 @@ function playlist(opt)
             if next_item.file.load(loader_opt) then
                 next_item.load_time = now - load_start
                 fade_start = now
-                state = "wait_fade"
+                state = "blur"
             end
         end
 
@@ -67,10 +115,10 @@ function playlist(opt)
         if state == "loading" then
             if next_item.file.load(loader_opt) then
                 next_item.load_time = now - load_start
-                state = "wait_fade"
+                state = "blur"
             end
         end
-        
+
         if state == "wait_fade" then
             if now > fade_start then
                 print("delta fade: ", now - fade_start)
@@ -95,6 +143,10 @@ function playlist(opt)
         if state == "unload" then
             if current_item and current_item ~= next_item then
                 current_item.file.unload()
+                if current_item.blurred then
+                    current_item.blurred:dispose()
+                    current_item.blurred = nil
+                end
             end
             current_item = next_item
             opt.playback_started(current_item)
@@ -105,13 +157,13 @@ function playlist(opt)
         -- Drawing
         local current_surface = blank
         if current_item then
-            current_surface = current_item.file.get_surface()
+            current_surface = current_item.blurred or current_item.file.get_surface()
         end
 
         if state == "crossfade" then
             local next_surface = blank
             if next_item then
-                next_surface = next_item.file.get_surface()
+                next_surface = next_item.blurred or next_item.file.get_surface()
             end
             opt.fade(next_item, current_surface, next_surface, progress, ...)
         else
@@ -120,6 +172,7 @@ function playlist(opt)
     end
 
     return {
+        prepare = prepare;
         draw = draw;
         set_switch_time = function(time)
             switch_time = time
