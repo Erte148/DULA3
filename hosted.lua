@@ -38,10 +38,7 @@ local resource_types = {
 
         function image.ensure_loaded()
             if not surface then
-                surface = resource.load_image{
-                    file = value.asset_name,
-                    mipmap = true,
-                }
+                surface = resource.load_image(value.asset_name, true)
             end
             return surface
         end
