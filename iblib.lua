@@ -13,7 +13,7 @@ function playlist(opt)
     local preload_start
     local progress
 
-    local state = "initial"
+    local state = "preload"
 
     local loader_opt = opt.loader_opt or {
         loop = false,
@@ -47,7 +47,7 @@ function playlist(opt)
     local function prepare()
         if state == "blur" then
             local obj = next_item.file.get_surface()
-            state = "wait_fade"
+            state = "crossfade"
 
             local iw, ih = obj:size()
             local i_aspect = iw/ih
@@ -67,65 +67,44 @@ function playlist(opt)
         end
     end
 
+    local PRELOAD_TIME = 1
+
     local function draw(...)
         local now = sys.now()
         -- print("state -> ", state)
 
-        if state == "initial" then
-            has_next, next_item = opt.get_next_item()
-            if not has_next then
-                print("no initial item")
-                return
-            end
-            state = "load_initial"
-            load_start = now
-        end
-        
-        if state == "load_initial" then
-            if next_item.file.load(loader_opt) then
-                next_item.load_time = now - load_start
-                fade_start = now
-                state = "blur"
-            end
+        if state == "schedule_next" then
+            preload_start = now + current_item.duration - switch_time - PRELOAD_TIME
+            state = "wait_preload"
         end
 
-        if state == "getnext" then
-            has_next, next_item = opt.get_next_item()
-            if not has_next then
-                print("no item")
-                return
-            else
-                state = "wait"
-                fade_start = now + current_item.duration - switch_time
-                preload_start = fade_start - (next_item.load_time or 0)
-            end
-        end
-
-        if state == "wait" then
+        if state == "wait_preload" then
             if now > preload_start then
                 state = "preload"
             end
         end
 
         if state == "preload" then
-            state = "loading"
-            load_start = now
-        end
-        
-        if state == "loading" then
-            if next_item.file.load(loader_opt) then
-                next_item.load_time = now - load_start
-                state = "blur"
+            has_next, next_item = opt.get_next_item()
+            if not has_next then
+                print("no item")
+            else
+                local ok, msg = pcall(next_item.file.load, loader_opt)
+                if not ok then
+                    print("ERROR: ", msg)
+                else
+                    fade_start = now + PRELOAD_TIME
+                    state = "wait_fade"
+                end
             end
         end
 
         if state == "wait_fade" then
             if now > fade_start then
-                print("delta fade: ", now - fade_start)
                 -- re-adjust. now might have passed fade_start for various reasons:
                 -- unexpected loading times, inactive node, ...
                 fade_start = now 
-                state = "crossfade"
+                state = "blur"
             end
         end
         
@@ -151,7 +130,7 @@ function playlist(opt)
             current_item = next_item
             opt.playback_started(current_item)
             next_item = nil
-            state = "getnext"
+            state = "schedule_next"
         end
 
         -- Drawing
