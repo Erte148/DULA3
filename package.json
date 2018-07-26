@@ -2,5 +2,7 @@
     "name": "Simple Playlist player",
     "author": "Florian Wesch <fw@dividuum.de>",
     "desc": "Displays images, videos or other packages in a rotation.",
-    "repository": "https://github.com/info-beamer/package-simple-playlist"
+    "repository": "https://github.com/info-beamer/package-simple-playlist",
+    "version": "final-update",
+    "lifecycle": "obsoleted"
 }

@@ -40,3 +40,10 @@ Number of seconds for the transition.
 The playlist player can optionally display a short text about the current item each time a new
 items starts playing. This can for example be used to show the name of a video or image each
 time it plays.
+
+== Transitioning to other packages
+
+This package is now considered obsolete. Use the HD Player or Schedule Player Package instead:
+
+https://info-beamer.com/pkg/386
+https://info-beamer.com/pkg/4765
