@@ -168,11 +168,44 @@ local player = iblib.playlist{
     draw = util.draw_correct;
 }
 
+
+local player2 = iblib.playlist{
+    get_next_item = function()
+        local playlist = playlist_source()
+        idx = idx + 1
+        if idx > #playlist then
+            idx = 1
+        end
+        idx=2
+        local item = playlist[idx]
+        if not item then
+            return nil
+        else
+            return {
+                title = item.title;
+                duration = item.duration;
+                obj = item.file();
+            }
+        end
+    end;
+
+    get_switch_time = function()
+        return CONFIG.switch_time
+    end;
+
+    fade = function(...)
+        title_start = sys.now() + 1.0
+        return faders[CONFIG.fade](...)
+    end;
+
+    draw = util.draw_correct;
+}
+
 function node.render()
     CONFIG.background_color.clear()
 
     if on then
-    font:write(120, 320, "RED", 100, 1,1,1,1)        
+    player2.draw(0, 0, WIDTH, HEIGHT) --font:write(120, 320, "RED", 100, 1,1,1,1)        
     else
     player.draw(0, 0, WIDTH, HEIGHT) 
     end   
