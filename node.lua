@@ -177,9 +177,9 @@ local player2 = iblib.playlist{
         local playlist = playlist_source2()
         idx = idx + 1
         if idx > #playlist then
-            --idx = 1
+            idx = 1
         end
-        idx=2
+        
         local item = playlist[idx]
         if not item then
             return nil
