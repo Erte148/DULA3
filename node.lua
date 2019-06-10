@@ -6,7 +6,7 @@ else
     gl.setup(CONFIG.width, CONFIG.height)
 end
 
-util.noglobals()
+--util.noglobals()
 local on = false
 local font = resource.load_font "silkscreen.ttf"
 util.data_mapper{
