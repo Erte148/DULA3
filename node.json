@@ -126,5 +126,33 @@
             "type": "string",
             "default": "unnamed"
         }]
-    }]
+    },
+      {
+        "title": "Playlist",
+        "name": "playlist2",
+        "type": "list",
+        "itemname": "Item",
+        "items": [{
+            "title": "Asset",
+            "ui_width": 5,
+            "name": "file",
+            "type": "resource",
+            "valid": ["image", "video", "child"],
+            "default": "empty.png"
+        }, {
+            "title": "Play time",
+            "ui_width": 3,
+            "name": "duration",
+            "type": "duration",
+            "default": 5
+        }, {
+            "title": "Title",
+            "ui_width": 4,
+            "name": "title",
+            "type": "string",
+            "default": "unnamed"
+        }]
+    }   
+    
+    ]
 }
