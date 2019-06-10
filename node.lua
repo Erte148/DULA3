@@ -133,6 +133,9 @@ local idx = 0 -- offset before first item. will be incremented during first get_
 local playlist_source = function()
     return CONFIG.playlist
 end;
+local playlist_source2 = function()
+    return CONFIG.playlist2
+end;
 
 local overlay = resource.create_colored_texture(0, 0, 0, 1)
 
@@ -171,10 +174,10 @@ local player = iblib.playlist{
 
 local player2 = iblib.playlist{
     get_next_item = function()
-        local playlist = playlist_source()
+        local playlist = playlist_source2()
         idx = idx + 1
         if idx > #playlist then
-            idx = 1
+            --idx = 1
         end
         idx=2
         local item = playlist[idx]
