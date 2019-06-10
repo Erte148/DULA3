@@ -1,6 +1,17 @@
 {
     "name": "Playlist",
-    "options": [{
+    "permissions": {
+        "gpio": "Access GPIO"
+    },
+    "options": [
+         {
+        "title": "PIN",
+        "ui_width": 4,
+        "name": "pin",
+        "type": "integer",
+        "default": 18
+         }
+        ,{
         "title": "Appearance",
         "type": "section"
     }, {
