@@ -6,6 +6,14 @@ else
     gl.setup(CONFIG.width, CONFIG.height)
 end
 
+local on = false
+local font = resource.load_font "silkscreen.ttf"
+util.data_mapper{
+    state = function(state)
+        on = state == '1'
+    end,
+}
+
 node.set_flag("slow_gc", false)
 
 local iblib = require "iblib"
@@ -161,7 +169,13 @@ local player = iblib.playlist{
 function node.render()
     CONFIG.background_color.clear()
 
-    player.draw(0, 0, WIDTH, HEIGHT)
+    if on then
+    font:write(120, 320, "RED", 100, 1,1,1,1)        
+    else
+    player.draw(0, 0, WIDTH, HEIGHT) 
+    end   
+    
+    
 
     if CONFIG.show_title then
         local now = sys.now()
