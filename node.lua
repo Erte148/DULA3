@@ -1,4 +1,4 @@
-hosted_init()
+--hosted_init()
 
 --if CONFIG.auto_resolution then
     gl.setup(NATIVE_WIDTH, NATIVE_HEIGHT)
