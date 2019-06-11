@@ -60,6 +60,14 @@ local player = iblib.playlist{
         end
     end;
 
+     get_switch_time = function()
+        return 0
+    end;
+
+    fade = function(...)
+        title_start = sys.now() + 1.0
+        return 0
+    end;
    
 
     draw = util.draw_correct;
@@ -84,7 +92,15 @@ local player2 = iblib.playlist{
                 obj = item.file();
             }
         end
-    end;    
+    end;
+    get_switch_time = function()
+        return 0
+    end;
+
+    fade = function(...)
+        title_start = sys.now() + 1.0
+        return 0
+    end;
 
     draw = util.draw_correct;
 }
