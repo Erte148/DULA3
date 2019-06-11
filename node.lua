@@ -1,10 +1,10 @@
 hosted_init()
 
-if CONFIG.auto_resolution then
+--if CONFIG.auto_resolution then
     gl.setup(NATIVE_WIDTH, NATIVE_HEIGHT)
-else
-    gl.setup(CONFIG.width, CONFIG.height)
-end
+--else
+    --gl.setup(CONFIG.width, CONFIG.height)
+--end
 
 --util.no_globals()
 local on = false
@@ -160,12 +160,12 @@ local player = iblib.playlist{
     end;
 
     get_switch_time = function()
-        return CONFIG.switch_time
+        return 0
     end;
 
     fade = function(...)
         title_start = sys.now() + 1.0
-        return faders[CONFIG.fade](...)
+        return faders[0](...)
     end;
 
     draw = util.draw_correct;
@@ -193,12 +193,12 @@ local player2 = iblib.playlist{
     end;
 
     get_switch_time = function()
-        return CONFIG.switch_time
+        return 0 --CONFIG.switch_time
     end;
 
     fade = function(...)
         title_start = sys.now() + 1.0
-        return faders[CONFIG.fade](...)
+        return faders[0](...)
     end;
 
     draw = util.draw_correct;
