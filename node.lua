@@ -205,35 +205,13 @@ local player2 = iblib.playlist{
 }
 
 function node.render()
-    CONFIG.background_color.clear()
+    --CONFIG.background_color.clear()
 
     if on then
     player2.draw(0, 0, WIDTH, HEIGHT) --font:write(120, 320, "RED", 100, 1,1,1,1)        
     else
     player.draw(0, 0, WIDTH, HEIGHT) 
     end   
-    
-    
+   
 
-    if CONFIG.show_title then
-        local now = sys.now()
-        if now > title_start then
-            local in_title = now - title_start
-            local alpha = 1.0
-            if in_title < 0.5 then
-                alpha = in_title * 2
-            elseif in_title > CONFIG.title_duration then
-                alpha = 0
-            elseif in_title > CONFIG.title_duration - 0.5 then
-                alpha = 1.0 - (in_title - CONFIG.title_duration + 0.5) * 2
-            end
-            overlay:draw(0, HEIGHT - CONFIG.title_size - 10, WIDTH, HEIGHT, 0.7 * alpha)
-            CONFIG.title_font:write(
-                10, HEIGHT - CONFIG.title_size - 5, 
-                player.get_current_item().title,
-                CONFIG.title_size,
-                1, 1, 1, alpha
-            )
-        end
-    end
 end
